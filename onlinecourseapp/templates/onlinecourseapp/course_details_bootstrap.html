@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if course %}{{ course.name }}{% else %}Online Courses{% endif %} - OnlineCourse Application</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .hero-banner {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 3rem 0;
+            border-radius: 0 0 1rem 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .lesson-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            border-radius: 12px;
+        }
+        .lesson-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .lesson-badge {
+            background-color: #eef2ff;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .btn-exam {
+            background-color: #2563eb;
+            color: white;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-exam:hover {
+            background-color: #1d4ed8;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'onlinecourseapp:index' %}">
+                <i class="fa-solid fa-graduation-cap me-2 text-warning"></i>OnlineCourse
+            </a>
+            <div class="ms-auto d-flex align-items-center">
+                <a href="/admin/" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-user-shield me-1"></i> Admin Panel
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    {% if course %}
+    <!-- Course Details View -->
+    <div class="hero-banner text-center">
+        <div class="container">
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3 text-uppercase">Course Overview</span>
+            <h1 class="display-4 fw-bold mb-3">{{ course.name }}</h1>
+            <p class="lead col-lg-8 mx-auto opacity-90">{{ course.description }}</p>
+            {% if course.pub_date %}
+                <p class="text-white-50 small mt-2"><i class="fa-regular fa-calendar-alt me-1"></i> Published: {{ course.pub_date }}</p>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'onlinecourseapp:exam' course.id %}" class="btn btn-exam btn-lg me-2 shadow">
+                    <i class="fa-solid fa-pen-to-square me-2"></i>Take Mock Exam
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-3 mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-book-open me-2 text-primary"></i>Course Lessons</h3>
+            <span class="badge bg-secondary rounded-pill fs-6 px-3 py-2">{{ course.lessons.all|length }} Lessons</span>
+        </div>
+
+        {% if course.lessons.all %}
+            <div class="row g-4">
+                {% for lesson in course.lessons.all %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm lesson-card">
+                        <div class="card-body d-flex flex-column p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge lesson-badge px-3 py-2 rounded-pill">Lesson {{ lesson.order }}</span>
+                                <small class="text-muted"><i class="fa-regular fa-clock me-1"></i>{{ lesson.questions.all|length }} Questions</small>
+                            </div>
+                            <h5 class="card-title fw-bold text-dark mb-2">{{ lesson.title }}</h5>
+                            <p class="card-text text-muted flex-grow-1">{{ lesson.content|default:"Interactive lesson module containing comprehensive study notes and practice questions." }}</p>
+                            <div class="pt-3 border-top mt-3 d-flex justify-content-between align-items-center">
+                                <span class="small text-muted fw-semibold">Status: Available</span>
+                                <a href="{% url 'onlinecourseapp:exam' course.id %}" class="btn btn-sm btn-outline-primary fw-semibold rounded-pill px-3">
+                                    Practice <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info shadow-sm rounded-3 p-4 text-center">
+                <i class="fa-solid fa-circle-info fa-2x mb-2 text-info"></i>
+                <p class="mb-0 fw-semibold">No lessons have been added to this course yet.</p>
+            </div>
+        {% endif %}
+        
+        <div class="text-center mt-5">
+            <div class="card bg-white p-4 shadow-sm rounded-3 border-0">
+                <h4 class="fw-bold text-dark mb-2">Ready to test your knowledge?</h4>
+                <p class="text-muted mb-3">Complete the course exam to receive instant grading, feedback, and score analysis.</p>
+                <div>
+                    <a href="{% url 'onlinecourseapp:exam' course.id %}" class="btn btn-exam btn-lg">
+                        <i class="fa-solid fa-file-signature me-2"></i>Start Mock Exam
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- All Courses List View -->
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-dark mb-2">Available Online Courses</h1>
+            <p class="lead text-muted">Select a course to view lessons and attempt mock exams</p>
+        </div>
+
+        {% if course_list %}
+            <div class="row g-4">
+                {% for course in course_list %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm lesson-card">
+                        <div class="card-body d-flex flex-column p-4">
+                            <span class="badge bg-primary text-white mb-3 align-self-start px-3 py-2 rounded-pill">Featured Course</span>
+                            <h4 class="card-title fw-bold text-dark mb-2">{{ course.name }}</h4>
+                            <p class="card-text text-muted flex-grow-1">{{ course.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                <span class="text-muted small"><i class="fa-solid fa-layer-group me-1"></i>{{ course.lessons.all|length }} Lessons</span>
+                                <a href="{% url 'onlinecourseapp:course_details' course.id %}" class="btn btn-primary fw-semibold rounded-pill px-4">
+                                    View Course <i class="fa-solid fa-chevron-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning text-center p-5 rounded-3 shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation fa-3x text-warning mb-3"></i>
+                <h4 class="fw-bold">No Courses Found</h4>
+                <p class="text-muted">Please run the sample data script or add courses via the Django Admin panel.</p>
+                <a href="/admin/" class="btn btn-dark fw-semibold px-4 mt-2">Go to Admin Panel</a>
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white-50 py-4 mt-auto">
+        <div class="container text-center">
+            <p class="mb-0 small">&copy; 2026 OnlineCourse Application. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
